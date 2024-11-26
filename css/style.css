@@ -69,9 +69,9 @@ body {
   -webkit-box-direction: normal;
       -ms-flex-direction: column;
           flex-direction: column;
-  background-image: url(../images/test1.jpg);
+  background-image: url(../images/test2.jpg);
   background-size: cover;
-  background-attachment: fixed;
+  background-attachment: scroll;
 }
 
 .sub_page .hero_area {
@@ -114,8 +114,8 @@ body {
   bottom: 0;
   width: 100%;
   height: 3px;
-  border-radius: 5px;
-  background-color: #ffffff;
+  border-radius: 5px; 
+  background-color: #000000;
 }
 
 .custom_nav-container.navbar-expand-lg .navbar-nav .nav-item.active a::after, .custom_nav-container.navbar-expand-lg .navbar-nav .nav-item:hover a::after {
@@ -297,7 +297,7 @@ a:focus {
 }
 
 .us_section {
-  background-image: url(../images/test2.jpg);
+  background-image: url(../images/test1.jpg);
   background-size: cover;
   background-attachment: fixed;
   color: #ffffff;
