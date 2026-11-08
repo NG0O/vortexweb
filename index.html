@@ -320,6 +320,27 @@
       opacity: 1;
     }
 
+    .contact-btn:focus-visible,
+    .copy-btn:focus-visible {
+      outline: 2px solid var(--primary);
+      outline-offset: 3px;
+    }
+
+    /* Footer hint wording: mouse vs touch screens */
+    .hint-touch { display: none; }
+    @media (hover: none) {
+      .hint-mouse { display: none; }
+      .hint-touch { display: inline; }
+    }
+
+    /* Vortex is drawn as a still frame for reduced motion, so the interaction hint does not apply */
+    @media (prefers-reduced-motion: reduce) {
+      .pulse-dot::before { animation: none; }
+      .contact-btn, .contact-btn svg, .copy-btn, .interaction-hint { transition: none; }
+      .interaction-hint { display: none; }
+      .footer-bar { justify-content: center; }
+    }
+
     @media (max-width: 640px) {
       .glass-card {
         padding: 2.25rem 1.5rem;
@@ -341,7 +362,7 @@
 <body>
 
   <!-- Interactive 3D Vortex Canvas -->
-  <canvas id="vortexCanvas"></canvas>
+  <canvas id="vortexCanvas" aria-hidden="true"></canvas>
 
   <!-- Ambient Light Fields & Vignette -->
   <div class="cosmic-glow"></div>
@@ -378,16 +399,16 @@
       <div class="actions-wrap">
         <a href="mailto:info@vortexweb.ch" class="contact-btn">
           <span>Get in Touch</span>
-          <svg class="icon-svg" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <svg class="icon-svg" aria-hidden="true" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"></path>
           </svg>
         </a>
 
         <button id="copyEmailBtn" class="copy-btn" title="Copy email to clipboard">
-          <svg class="icon-svg" style="color: #38bdf8;" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <svg class="icon-svg" aria-hidden="true" style="color: #38bdf8;" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"></path>
           </svg>
-          <span id="copyBtnText">info@vortexweb.ch</span>
+          <span id="copyBtnText" aria-live="polite">info@vortexweb.ch</span>
         </button>
       </div>
     </div>
@@ -396,10 +417,11 @@
   <!-- Interactive Hint Footer -->
   <footer class="footer-bar">
     <div class="interaction-hint">
-      <svg class="icon-svg" style="color: #00f0ff;" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <svg class="icon-svg" aria-hidden="true" style="color: #00f0ff;" fill="none" stroke="currentColor" viewBox="0 0 24 24">
         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 15l-2 5L9 9l11 4-5 2zm0 0l5 5M7.188 2.239l.777 2.897M5.136 7.965l-2.898-.777M13.95 4.05l-2.122 2.122m-5.657 5.656l-2.12 2.122"></path>
       </svg>
-      <span>Move cursor or tap anywhere to guide the vortex gravitational field</span>
+      <span class="hint-mouse">Move your cursor or click to guide the vortex gravitational field</span>
+      <span class="hint-touch">Tap or drag anywhere to guide the vortex gravitational field</span>
     </div>
     <div>
       &copy; <span id="year"></span> Vortexweb. All rights reserved.
@@ -637,7 +659,12 @@
         }
       }
 
-      window.addEventListener('resize', resize);
+      const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+      window.addEventListener('resize', () => {
+        resize();
+        if (reduceMotion) drawStill(); // resizing clears the canvas
+      });
       resize();
 
       // Mouse and touch interaction listeners
@@ -680,7 +707,7 @@
       let lastTime = performance.now();
 
       function animate(time) {
-        requestAnimationFrame(animate);
+        if (!reduceMotion) requestAnimationFrame(animate);
 
         const dt = Math.min((time - lastTime) / 1000, 0.1);
         lastTime = time;
@@ -763,7 +790,13 @@
         ctx.globalCompositeOperation = 'source-over';
       }
 
-      requestAnimationFrame(animate);
+      // Reduced motion: simulate a few frames once so the trails build up, then stay still
+      function drawStill() {
+        for (let i = 0; i < 40; i++) animate(i * 16);
+      }
+
+      if (reduceMotion) drawStill();
+      else requestAnimationFrame(animate);
     })();
   </script>
 </body>
